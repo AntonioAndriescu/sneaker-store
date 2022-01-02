@@ -7,7 +7,7 @@
 				<form id="form">
 					<div id="user-info">
 						<div class="form-field">
-							<input required class="form-control" type="text" name="name" placeholder="Name..">
+							<input required class="form-control" type="text" name="name" placeholder="Nume..">
 						</div>
 						<div class="form-field">
 							<input required class="form-control" type="email" name="email" placeholder="Email..">
@@ -19,7 +19,7 @@
 						<p>Informatii de livrare:</p>
 						<hr>
 						<div class="form-field">
-							<input class="form-control" type="text" name="address" placeholder="Addresa..">
+							<input class="form-control" type="text" name="address" placeholder="Adresa..">
 						</div>
 						<div class="form-field">
 							<input class="form-control" type="text" name="city" placeholder="Oras..">
@@ -35,20 +35,21 @@
 					</div>
 
 					<hr>
-					<input id="form-button" class="btn btn-success btn-block" type="submit" value="Continue">
+					<input id="form-button" class="btn btn-success btn-block" type="submit" value="Continua">
 				</form>
 			</div>
 
 			<br>
 			<div class="box-element hidden" id="payment-info">
 				<small>Plata prin Paypal</small>
+				<button id = "make-payment">Efectuare plata</button>
 			</div>
 			
 		</div>
 
 		<div class="col-lg-6">
 			<div class="box-element">
-				<a  class="btn btn-outline-dark" href="{% url 'cart' %}">&#x2190; Back to Cart</a>
+				<a  class="btn btn-outline-dark" href="{% url 'cart' %}">&#x2190; Inapoi la cos</a>
 				<hr>
 				<h3>Rezumatul comenzii</h3>
 				<hr>
@@ -67,4 +68,74 @@
 			</div>
 		</div>
 	</div>
+
+	<script type = "text/javascript">
+		var total = '{{order.get_cart_total|floatformat:2}}'
+
+		if(user != 'AnonymousUser') {
+			document.getElementById('user-info').innerHTML = ''
+		}
+
+		var form = document.getElementById('form')
+
+		form.addEventListener('submit', function(e){
+			e.preventDefault()
+			console.log('Form submitted...')
+			document.getElementById('form-button').classList.add('hidden')
+			document.getElementById('payment-info').classList.remove('hidden')
+		})
+
+		document.getElementById('make-payment').addEventListener('click', function(e){
+			submitFormData()
+		})
+
+		function submitFormData() {
+			console.log('payment button clicked')
+
+			var userFormData = {
+				'name':null,
+				'email':null, 
+				'total':total,
+			}
+
+			var shippingInfo = {
+				'address':null,
+				'city':null, 
+				'state':null,
+				'zipcode':null,
+			}
+
+			shippingInfo.address = form.address.value
+			shippingInfo.city = form.city.value
+			shippingInfo.state = form.state.value
+			shippingInfo.zipcode = form.zipcode.value
+
+			if(user == 'AnonymousUser') {
+				userFormData.name = form.name.value
+				userFormData.email = form.email.value
+			}
+
+			var url = '/process_order/'
+			fetch(url, {
+				method:'POST',
+				headers:{
+					'Content-Type':'application/json',
+					'X-CSRFToken':csrftoken,
+				},
+				body:JSON.stringify({'form':userFormData, 'shipping':shippingInfo}
+					)
+			})
+			.then((response) => response.json())
+			.then((data) => {
+				console.log('succes:', data);
+				alert('Tranzactie efectuata');
+
+				//resetam cookie-ul
+				cart = {}
+				document.cookie = 'cart=' + JSON.stringify(cart) + ";domain=;path=/"
+				
+				window.location.href = "{% url 'store' %}"
+			})
+		}
+	</script>
 {% endblock content %}

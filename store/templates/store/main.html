@@ -31,6 +31,29 @@
               return cookieValue;
         }
           var csrftoken = getToken('csrftoken');
+        
+          //cookie folosit ca produse adaugate in cos de guests sa ramana pentru cand revin pe site
+          function getCookie(name) {
+            var cookieArr = document.cookie.split(";");
+
+            for(var i = 0; i < cookieArr.length; i++) {
+              var cookiePair = cookieArr[i].split("=");
+
+              if(name == cookiePair[0].trim()) {
+                return decodeURIComponent(cookiePair[1]);
+              }
+            }
+            return null;
+          }
+
+          var cart = JSON.parse(getCookie('cart'))
+          if(cart == undefined) {
+            cart = {}
+            console.log('Cart was created')
+            document.cookie = 'cart =' + JSON.stringify(cart) + ";domain=;path=/"
+          }
+
+          console.log('Cart:', cart)
         </script>
 
      </head>
@@ -47,7 +70,8 @@
            
               </ul>
               <div class="form-inline my-2 my-lg-0">
-                   <a href="#"class="btn btn-primary">Login</a>
+                   <a href="{% url 'login' %}"class="btn btn-primary">Login</a>
+                   <a href="{% url 'register' %}"class="btn btn-primary">Register</a>
                    
                    <a href="{% url 'cart' %}">
                       <img  id="cart-icon" src="{% static 'images/cart.png' %}">
