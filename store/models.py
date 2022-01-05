@@ -9,7 +9,7 @@ class Customer(models.Model):
     email = models.CharField(max_length=200, null=True)
 
     def __str__(self):
-        return self.name
+        return self.name or ' '
 
 class Product(models.Model):
     name = models.CharField(max_length=200, null=True)
@@ -75,4 +75,5 @@ class ShippingAddress(models.Model):
     
     def __str__(self):
         return self.address
+
 
